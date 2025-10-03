@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<!-- Chosen Palette: Poscharnegg Corporate Teal -->
+<!-- Application Structure Plan: The SPA is structured as a guided, task-oriented journey. It starts with a 'Dashboard' that includes a strategic intro and an interactive, collapsible card section explaining key concepts. It then flows to a 'Diagnose' section where the user identifies challenges, which dynamically reveals relevant solutions. An engaging 'Demo Use Cases' section follows to make the abstract solutions tangible. Finally, the user can build a personalized 'Umsetzung-Fahrplan'. This intro-problem-solution-demo-plan structure was chosen to educate first, then guide a business leader logically from identifying needs to creating a strategic implementation roadmap. -->
+<!-- Visualization & Content Choices: 1. Report Info: Demo Use Cases. Goal: Make AI tangible. Viz: Interactive HTML/CSS cards. Interaction: Button clicks simulate AI processing (text reveals, summaries). Justification: Interactive demos are more impactful than static text for creating a 'wow' effect. 2. Report Info: Implementation Roadmap. Goal: Organize steps. Viz: Structured HTML/CSS. Interaction: Items are dynamically added. Justification: A personalized plan is more actionable. 3. Report Info: Challenges vs. Solutions. Goal: Connect problems to solutions. Viz: HTML Checkbox form & <details> elements. Interaction: Checking a challenge reveals solutions. Justification: Creates an interactive discovery path. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<html lang="de" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KI-Strategie-Assistent | Porscharnegg GmbH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #009688; /* Poscharnegg Teal */
+            --secondary-color: #00796B; /* Darker Teal for hover/buttons */
+            --accent-color: #FFC107; /* A vibrant amber/yellow for highlights */
+            --background-color: #f4f7f6;
+            --text-color: #212121;
+            --success-color: #4CAF50;
+            --light-success-bg: #E8F5E9;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        .section {
+            scroll-margin-top: 80px;
+        }
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .tag-low-hanging {
+            background-color: var(--light-success-bg);
+            color: var(--success-color);
+        }
+        .tag-strategic {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+        .tag-advanced {
+            background-color: #fce4ec;
+            color: #c2185b;
+        }
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        .intro-card summary::after {
+            content: '+';
+            font-size: 1.5rem;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+        .intro-card[open] summary::after {
+            transform: rotate(45deg);
+        }
+        .gemini-button {
+            background: var(--accent-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+        }
+        .gemini-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background-color: #ffca28;
+        }
+        .gemini-button:disabled {
+            background: #e0e0e0;
+            color: #9e9e9e;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .prose h3 {
+            color: var(--secondary-color);
+            font-weight: 600;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+    </style>
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+</head>
+<body class="antialiased">
+
+    <div id="geminiModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white p-4 border-b flex justify-between items-center">
+                <h3 id="geminiModalTitle" class="text-2xl font-bold" style="color: var(--primary-color);">KI-Analyse</h3>
+                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            </div>
+            <div id="geminiModalContent" class="p-6">
+                <div class="flex justify-center items-center h-40">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <nav style="background-color: var(--primary-color);">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-white">POSCHARNEGG KI-ASSISTENT</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#dashboard" class="text-white hover:bg-[color:var(--secondary-color)] px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+                        <a href="#diagnose" class="text-white hover:bg-[color:var(--secondary-color)] px-3 py-2 rounded-md text-sm font-medium">Analyse</a>
+                        <a href="#loesungen" class="text-white hover:bg-[color:var(--secondary-color)] px-3 py-2 rounded-md text-sm font-medium">Lösungen</a>
+                        <a href="#demos" class="text-white hover:bg-[color:var(--secondary-color)] px-3 py-2 rounded-md text-sm font-medium">Demo Use Cases</a>
+                        <a href="#fahrplan" class="text-white hover:bg-[color:var(--secondary-color)] px-3 py-2 rounded-md text-sm font-medium">Umsetzung-Fahrplan</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <section id="dashboard" class="section bg-white p-8 rounded-2xl shadow-lg mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4" style="color: var(--primary-color);">Ihr strategischer KI-Assistent</h1>
+            <p class="text-lg text-gray-700 mb-8">Willkommen! Dieser Assistent hilft Ihnen, das Potenzial von Künstlicher Intelligenz (KI) für Ihr Unternehmen zu verstehen und konkrete nächste Schritte zu planen.</p>
+
+            <div class="bg-teal-50/50 p-6 rounded-2xl mb-8 border border-teal-100">
+                <h2 class="text-2xl font-bold mb-6 text-center" style="color: var(--primary-color);">KI als strategische Notwendigkeit in der Logistik</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color:var(--secondary-color)">Von der Vision zur Realität</h3>
+                        <p class="text-gray-700 text-sm">Künstliche Intelligenz ist keine Zukunftsmusik mehr. Sie ist heute ein Satz praxisnaher Werkzeuge, die Effizienz steigern und Probleme lösen. Während die Technologie sich rasant weiterentwickelt, ist der entscheidende Punkt: KI kann bereits jetzt in KMUs wie Ihrem einen messbaren Mehrwert schaffen.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color:var(--secondary-color)">Der entscheidende Wettbewerbsvorteil</h3>
+                        <p class="text-gray-700 text-sm">Für Logistikunternehmen bedeutet der Einsatz von KI nicht nur Kostenersparnis. Es geht darum, schneller, flexibler und widerstandsfähiger als der Wettbewerb zu sein. Wer sich heute mit KI beschäftigt, sichert sich entscheidende Vorteile – national wie international – und gestaltet die strategische Ausrichtung des Unternehmens aktiv für die Zukunft.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 pt-8 mb-8">
+                 <h2 class="text-2xl font-bold mb-6 text-center" style="color: var(--primary-color);">Schlüsselbegriffe im Überblick</h2>
+                <div class="space-y-4">
+                    <details class="intro-card bg-gray-50 p-4 rounded-lg">
+                        <summary class="flex justify-between items-center cursor-pointer">
+                            <h3 class="font-bold text-xl" style="color:var(--secondary-color)">Digitalisierung, Automatisierung & KI</h3>
+                        </summary>
+                        <div class="mt-4 text-gray-700 text-sm grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div><strong>📄➡️💻 Digitalisierung:</strong> Wandelt analoge Informationen (z.B. Lieferscheine) in digitale Daten um. Sie ist die Basis für alles Weitere.</div>
+                            <div><strong>⚙️ Automatisierung:</strong> Nutzt diese Daten, um einfache, regelbasierte Aufgaben ohne menschliches Zutun auszuführen (z.B. automatische Rechnungsstellung).</div>
+                            <div><strong>🧠 Künstliche Intelligenz (KI):</strong> Lernt aus Daten, erkennt Muster und trifft eigenständige Entscheidungen, um komplexe Probleme zu lösen (z.B. optimale Routen vorhersagen).</div>
+                        </div>
+                    </details>
+                     <details class="intro-card bg-gray-50 p-4 rounded-lg">
+                        <summary class="flex justify-between items-center cursor-pointer">
+                            <h3 class="font-bold text-xl" style="color:var(--secondary-color)">IT vs. KI: Wer macht was?</h3>
+                        </summary>
+                        <div class="mt-4 text-gray-700 text-sm grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div><strong>🔌 Die Rolle der IT:</strong> Ihre IT stellt die Infrastruktur bereit (Server, Netzwerke, Software, Sicherheit). Sie ist das stabile Fundament – wie das Stromnetz in einem Haus.</div>
+                             <div><strong>🚀 Die Rolle der KI:</strong> KI ist ein strategischer Prozess, der diese Infrastruktur nutzt, um Mehrwert zu schaffen. Es ist eine Unternehmens-Transformation, keine reine IT-Aufgabe.</div>
+                        </div>
+                    </details>
+                     <details class="intro-card bg-gray-50 p-4 rounded-lg">
+                        <summary class="flex justify-between items-center cursor-pointer">
+                            <h3 class="font-bold text-xl" style="color:var(--secondary-color)">Warum ist KI ein permanenter Prozess?</h3>
+                        </summary>
+                        <div class="mt-4 text-gray-700 text-sm">
+                           <p>Die Technologie entwickelt sich rasant weiter. Der Einstieg in KI ist kein einmaliges Projekt mit einem festen Enddatum. Es ist der Beginn einer kontinuierlichen Reise, bei der das Unternehmen lernt, sich anpasst und ständig neue Möglichkeiten zur Effizienzsteigerung und Wertschöpfung entdeckt. Der Prozess, der heute gestartet wird, sichert die Wettbewerbsfähigkeit von morgen.</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <a href="#diagnose" class="inline-block text-white font-bold text-lg px-8 py-4 rounded-lg transition-transform duration-200 hover:scale-105 shadow-md" style="background-color: var(--primary-color);">▶️ Beginnen Sie jetzt Ihre persönliche Analyse</a>
+        </section>
+
+        <section id="diagnose" class="section bg-white p-8 rounded-2xl shadow-lg mb-12">
+            <h2 class="text-3xl font-bold mb-6" style="color: var(--primary-color);"><span class="text-4xl mr-2" style="color:var(--accent-color);">1.</span>Wo drückt der Schuh? Ihr Diagnose-Tool</h2>
+            <p class="text-gray-700 mb-8">Wählen Sie die Bereiche aus, in denen Sie das größte Optimierungspotenzial sehen. Ihre Auswahl bestimmt, welche KI-Lösungen Ihnen im nächsten Schritt empfohlen werden.</p>
+            <div id="challengeForm" class="space-y-4">
+                <label class="flex items-center p-4 bg-white border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-[color:var(--primary-color)] has-[:checked]:bg-teal-50 has-[:checked]:border-[color:var(--primary-color)]">
+                    <input type="checkbox" name="challenge" value="fahrer" class="h-6 w-6 rounded border-gray-300 text-[color:var(--primary-color)] focus:ring-[color:var(--primary-color)]">
+                    <span class="ml-4 text-lg font-medium text-gray-800">Herausforderungen durch Fahrerwechsel & Sprachbarrieren.</span>
+                </label>
+                <label class="flex items-center p-4 bg-white border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-[color:var(--primary-color)] has-[:checked]:bg-teal-50 has-[:checked]:border-[color:var(--primary-color)]">
+                    <input type="checkbox" name="challenge" value="schulung" class="h-6 w-6 rounded border-gray-300 text-[color:var(--primary-color)] focus:ring-[color:var(--primary-color)]">
+                    <span class="ml-4 text-lg font-medium text-gray-800">Aufwendige Mitarbeiterschulung & Onboarding-Prozesse.</span>
+                </label>
+                <label class="flex items-center p-4 bg-white border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-[color:var(--primary-color)] has-[:checked]:bg-teal-50 has-[:checked]:border-[color:var(--primary-color)]">
+                    <input type="checkbox" name="challenge" value="telefon" class="h-6 w-6 rounded border-gray-300 text-[color:var(--primary-color)] focus:ring-[color:var(--primary-color)]">
+                    <span class="ml-4 text-lg font-medium text-gray-800">Hoher Telefonaufwand: Manuelle Koordination und Informationsweitergabe binden den Empfang.</span>
+                </label>
+                 <label class="flex items-center p-4 bg-white border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-[color:var(--primary-color)] has-[:checked]:bg-teal-50 has-[:checked]:border-[color:var(--primary-color)]">
+                    <input type="checkbox" name="challenge" value="meetings" class="h-6 w-6 rounded border-gray-300 text-[color:var(--primary-color)] focus:ring-[color:var(--primary-color)]">
+                    <span class="ml-4 text-lg font-medium text-gray-800">Zeitaufwändiges Meeting-Berichtswesen: Manuelle Protokollerstellung und Nachverfolgung.</span>
+                </label>
+                 <label class="flex items-center p-4 bg-white border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-[color:var(--primary-color)] has-[:checked]:bg-teal-50 has-[:checked]:border-[color:var(--primary-color)]">
+                    <input type="checkbox" name="challenge" value="dokumente" class="h-6 w-6 rounded border-gray-300 text-[color:var(--primary-color)] focus:ring-[color:var(--primary-color)]">
+                    <span class="ml-4 text-lg font-medium text-gray-800">Komplexe Unterlagen: Aufwendiges Studieren neuer Gesetze, Verordnungen & Genehmigungen.</span>
+                </label>
+                <label class="flex items-center p-4 bg-white border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-[color:var(--primary-color)] has-[:checked]:bg-teal-50 has-[:checked]:border-[color:var(--primary-color)]">
+                    <input type="checkbox" name="challenge" value="aufwand" class="h-6 w-6 rounded border-gray-300 text-[color:var(--primary-color)] focus:ring-[color:var(--primary-color)]">
+                    <span class="ml-4 text-lg font-medium text-gray-800">Allgemeiner administrativer Aufwand: Zu viel Zeit für E-Mails, Berichte und Koordination.</span>
+                </label>
+                <label class="flex items-center p-4 bg-white border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-[color:var(--primary-color)] has-[:checked]:bg-teal-50 has-[:checked]:border-[color:var(--primary-color)]">
+                    <input type="checkbox" name="challenge" value="ausfaelle" class="h-6 w-6 rounded border-gray-300 text-[color:var(--primary-color)] focus:ring-[color:var(--primary-color)]">
+                    <span class="ml-4 text-lg font-medium text-gray-800">Ungeplante Fahrzeugausfälle: Defekte führen zu teuren Stillständen und unzufriedenen Kunden.</span>
+                </label>
+                <label class="flex items-center p-4 bg-white border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-[color:var(--primary-color)] has-[:checked]:bg-teal-50 has-[:checked]:border-[color:var(--primary-color)]">
+                    <input type="checkbox" name="challenge" value="ausschreibung" class="h-6 w-6 rounded border-gray-300 text-[color:var(--primary-color)] focus:ring-[color:var(--primary-color)]">
+                    <span class="ml-4 text-lg font-medium text-gray-800">Zeitfressende Ausschreibungen: Manuelle Analyse von Leistungsverzeichnissen bindet Ressourcen.</span>
+                </label>
+            </div>
+        </section>
+
+        <section id="loesungen" class="section bg-white p-8 rounded-2xl shadow-lg mb-12">
+            <h2 class="text-3xl font-bold mb-6" style="color: var(--primary-color);"><span class="text-4xl mr-2" style="color:var(--accent-color);">2.</span>Ihre maßgeschneiderten KI-Lösungen</h2>
+            <p class="text-gray-700 mb-6">Basierend auf Ihren Angaben sind dies die relevantesten KI-Anwendungen. Nutzen Sie die Gemini-Funktionen für eine detaillierte Analyse oder um passende Anbieter zu finden.</p>
+            <p id="solutionsPlaceholder" class="text-gray-600 bg-gray-100 p-4 rounded-lg">Bitte wählen Sie zuerst Ihre Herausforderungen im Diagnose-Tool aus, um die passenden Lösungen anzuzeigen.</p>
+            <div id="solutionsContainer" class="space-y-6">
+                <details id="solution_fahrer" class="solution-card hidden border rounded-lg overflow-hidden">
+                    <summary class="p-5 font-bold text-xl cursor-pointer bg-gray-50 hover:bg-gray-100" style="color: var(--primary-color);">💡 KI-Übersetzer & Onboarding-Assistent für Fahrer</summary>
+                    <div class="p-6 border-t">
+                        <p class="mb-4 text-gray-700"><strong>KI-Lösung:</strong> Eine mobile App für Fahrer, die Echtzeit-Sprachübersetzung für typische Situationen (Laderampe, Kontrolle, Panne) bietet. Gleichzeitig dient sie als interaktiver Onboarding-Guide, der wichtige Unternehmensregeln und Fahrzeug-Informationen in der Muttersprache des Fahrers vermittelt.</p>
+                        <ul class="list-disc pl-5 space-y-2 mb-4">
+                            <li><strong style="color:var(--success-color);">Reduzierung von Missverständnissen</strong> und Wartezeiten im Ausland.</li>
+                            <li><strong style="color:var(--success-color);">Erhöhung der Sicherheit</strong> und Prozess-Konformität.</li>
+                            <li><strong style="color:var(--success-color);">Verbesserte Fahrerzufriedenheit</strong> und -bindung.</li>
+                        </ul>
+                         <div class="flex flex-wrap gap-4 items-center mt-4"><span class="tag tag-strategic">Strategisches Projekt</span><button class="fahrplan-button" data-fahrplan-item="fahrplan_fahrer_app">➕ Zum Fahrplan hinzufügen</button><button class="gemini-button text-sm" data-gemini-type="analyze" data-gemini-prompt-source="solution_fahrer">✨ Implementierungs-Analyse</button><button class="gemini-button text-sm" data-gemini-type="vendor" data-gemini-prompt-source="solution_fahrer">✨ Anbieter-Vorschläge</button></div>
+                    </div>
+                </details>
+                 <details id="solution_schulung" class="solution-card hidden border rounded-lg overflow-hidden">
+                    <summary class="p-5 font-bold text-xl cursor-pointer bg-gray-50 hover:bg-gray-100" style="color: var(--primary-color);">💡 KI-Wissensdatenbank für Mitarbeiter</summary>
+                    <div class="p-6 border-t">
+                        <p class="mb-4 text-gray-700"><strong>KI-Lösung:</strong> Erstellen Sie eine zentrale, intelligente Wissensdatenbank mit all Ihren internen Dokumenten (Handbücher, Prozessanweisungen etc.). Mitarbeiter können der KI einfach Fragen in natürlicher Sprache stellen ("Wie melde ich einen Schaden?") und erhalten sofort die richtige Antwort.</p>
+                        <ul class="list-disc pl-5 space-y-2 mb-4">
+                            <li><strong style="color:var(--success-color);">Beschleunigtes Onboarding</strong> neuer Mitarbeiter.</li>
+                            <li><strong style="color:var(--success-color);">Entlastung erfahrener Kollegen</strong> von Standardfragen.</li>
+                        </ul>
+                         <div class="flex flex-wrap gap-4 items-center mt-4"><span class="tag tag-strategic">Strategisches Projekt</span><button class="fahrplan-button" data-fahrplan-item="fahrplan_wissensbasis">➕ Zum Fahrplan hinzufügen</button><button class="gemini-button text-sm" data-gemini-type="analyze" data-gemini-prompt-source="solution_schulung">✨ Implementierungs-Analyse</button><button class="gemini-button text-sm" data-gemini-type="vendor" data-gemini-prompt-source="solution_schulung">✨ Anbieter-Vorschläge</button></div>
+                    </div>
+                </details>
+                <details id="solution_aufwand" class="solution-card hidden border rounded-lg overflow-hidden">
+                    <summary class="p-5 font-bold text-xl cursor-pointer bg-gray-50 hover:bg-gray-100" style="color: var(--primary-color);">💡 Microsoft 365 Copilot für Verwaltung</summary>
+                    <div class="p-6 border-t"><p class="mb-4 text-gray-700">Als KI-Assistent, direkt in Outlook und Excel integriert, fasst Copilot E-Mails zusammen, erstellt Angebotsentwürfe und analysiert Fuhrparkdaten auf Zuruf.</p<ul class="list-disc pl-5 space-y-2 mb-4"><li><strong style="color:var(--success-color);">Drastische Zeitersparnis</strong> bei administrativen Tätigkeiten.</li><li><strong style="color:var(--success-color);">Schnellere Reaktionszeiten</strong> auf Kundenanfragen.</li></ul><div class="flex flex-wrap gap-4 items-center mt-4"><span class="tag tag-low-hanging">Low-Hanging Fruit</span><button class="fahrplan-button" data-fahrplan-item="fahrplan_copilot">➕ Zum Fahrplan hinzufügen</button><button class="gemini-button text-sm" data-gemini-type="analyze" data-gemini-prompt-source="solution_aufwand">✨ Implementierungs-Analyse</button><button class="gemini-button text-sm" data-gemini-type="vendor" data-gemini-prompt-source="solution_aufwand">✨ Anbieter-Vorschläge</button></div></div>
+                </details>
+                <details id="solution_demo_fonio" class="solution-card hidden border rounded-lg overflow-hidden">
+                    <summary class="p-5 font-bold text-xl cursor-pointer bg-gray-50 hover:bg-gray-100" style="color: var(--primary-color);">💡 KI-gestützte Meeting-Protokolle (z.B. fonio AI)</summary>
+                    <div class="p-6 border-t">
+                        <p class="mb-4 text-gray-700"><strong>KI-Lösung:</strong> Ein Meeting-AI-Tool wie <strong>fonio</strong> zeichnet Gespräche auf, transkribiert sie in Echtzeit und erstellt auf Knopfdruck strukturierte Zusammenfassungen und Aufgabenlisten.</p>
+                        <ul class="list-disc pl-5 space-y-2 mb-4">
+                            <li><strong style="color:var(--success-color);">>80% Zeitersparnis</strong> bei der Protokollerstellung.</li>
+                            <li><strong style="color:var(--success-color);">Sofortige, umsetzbare Aufgabenlisten</strong> für Ihr Team.</li>
+                        </ul>
+                         <div class="flex flex-wrap gap-4 items-center mt-4"><span class="tag tag-low-hanging">Low-Hanging Fruit</span><button class="fahrplan-button" data-fahrplan-item="fahrplan_meeting_ai">➕ Zum Fahrplan hinzufügen</button><button class="gemini-button text-sm" data-gemini-type="analyze" data-gemini-prompt-source="solution_demo_fonio">✨ Implementierungs-Analyse</button><button class="gemini-button text-sm" data-gemini-type="vendor" data-gemini-prompt-source="solution_demo_fonio">✨ Anbieter-Vorschläge</button></div>
+                    </div>
+                </details>
+                <details id="solution_dokumente" class="solution-card hidden border rounded-lg overflow-hidden">
+                    <summary class="p-5 font-bold text-xl cursor-pointer bg-gray-50 hover:bg-gray-100" style="color: var(--primary-color);">💡 KI-gestützte Dokumenten-Analyse</summary>
+                    <div class="p-6 border-t">
+                        <p class="mb-4 text-gray-700"><strong>KI-Lösung:</strong> Eine spezialisierte KI liest und versteht Ihre Dokumente (PDFs, Word etc.). Sie können der KI gezielte Fragen stellen ("Was sind die wichtigsten Änderungen in der neuen ADR-Verordnung?") und erhalten in Sekunden präzise Antworten.</p>
+                        <ul class="list-disc pl-5 space-y-2 mb-4">
+                            <li><strong style="color:var(--success-color);">>90% Zeitersparnis</strong> bei der Recherche in komplexen Dokumenten.</li>
+                             <li><strong class="text-red-700">Minimierung des Risikos</strong>, wichtige rechtliche Änderungen zu übersehen.</li>
+                        </ul>
+                         <div class="flex flex-wrap gap-4 items-center mt-4"><span class="tag tag-strategic">Strategisches Projekt</span><button class="fahrplan-button" data-fahrplan-item="fahrplan_dokumentenanalyse">➕ Zum Fahrplan hinzufügen</button><button class="gemini-button text-sm" data-gemini-type="analyze" data-gemini-prompt-source="solution_dokumente">✨ Implementierungs-Analyse</button><button class="gemini-button text-sm" data-gemini-type="vendor" data-gemini-prompt-source="solution_dokumente">✨ Anbieter-Vorschläge</button></div>
+                    </div>
+                </details>
+                <details id="solution_ausfaelle" class="solution-card hidden border rounded-lg overflow-hidden">
+                    <summary class="p-5 font-bold text-xl cursor-pointer bg-gray-50 hover:bg-gray-100" style="color: var(--primary-color);">💡 Vorausschauende Wartung</summary>
+                    <div class="p-6 border-t"><p class="mb-4 text-gray-700">Die KI analysiert kontinuierlich Sensordaten Ihrer LKW-Flotte, erkennt frühzeitig Muster, die auf einen Defekt hindeuten, und schlägt proaktiv Werkstatttermine vor.</p<ul class="list-disc pl-5 space-y-2 mb-4"><li><strong style="color:var(--success-color);">30-50% Reduzierung</strong> ungeplanter Ausfallzeiten.</li><li><strong style="color:var(--success-color);">20-30% Senkung</strong> der Wartungs- und Reparaturkosten.</li></ul><div class="flex flex-wrap gap-4 items-center mt-4"><span class="tag tag-advanced">Fortgeschrittenes Projekt</span><button class="fahrplan-button" data-fahrplan-item="fahrplan_wartung">➕ Zum Fahrplan hinzufügen</button><button class="gemini-button text-sm" data-gemini-type="analyze" data-gemini-prompt-source="solution_ausfaelle">✨ Implementierungs-Analyse</button><button class="gemini-button text-sm" data-gemini-type="vendor" data-gemini-prompt-source="solution_ausfaelle">✨ Anbieter-Vorschläge</button></div></div>
+                </details>
+                <details id="solution_ausschreibung" class="solution-card hidden border rounded-lg overflow-hidden">
+                    <summary class="p-5 font-bold text-xl cursor-pointer bg-gray-50 hover:bg-gray-100" style="color: var(--primary-color);">💡 KI-gestützte Ausschreibungs-Analyse</summary>
+                    <div class="p-6 border-t"><p class="mb-4 text-gray-700">Spezialisierte KI liest und versteht Ausschreibungsdokumente (z.B. GAEB) innerhalb von Minuten und extrahiert automatisch alle relevanten Positionen und Mengen.</p<ul class="list-disc pl-5 space-y-2 mb-4"><li><strong style="color:var(--success-color);">>50% Zeitersparnis</strong> bei der Analyse von Ausschreibungen.</li><li><strong style="color:var(--success-color);">Erhöhung der Angebotsquote</strong> und Gewinnchancen.</li></ul><div class="flex flex-wrap gap-4 items-center mt-4"><span class="tag tag-strategic">Strategisches Projekt</span><button class="fahrplan-button" data-fahrplan-item="fahrplan_ausschreibung">➕ Zum Fahrplan hinzufügen</button><button class="gemini-button text-sm" data-gemini-type="analyze" data-gemini-prompt-source="solution_ausschreibung">✨ Implementierungs-Analyse</button><button class="gemini-button text-sm" data-gemini-type="vendor" data-gemini-prompt-source="solution_ausschreibung">✨ Anbieter-Vorschläge</button></div></div>
+                </details>
+            </div>
+        </section>
+        
+        <section id="demos" class="section mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-center" style="color: var(--primary-color);"><span class="text-4xl mr-2" style="color:var(--accent-color);">3.</span>Greifbare KI: Demo Use Cases</h2>
+            <p class="text-center text-gray-700 mb-8 max-w-3xl mx-auto">Was kann KI heute wirklich? Diese interaktiven Demos zeigen Ihnen an konkreten Beispielen, wie Sie komplexe Aufgaben in Sekunden lösen und so einen echten Mehrwert für Ihr Unternehmen schaffen.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                <!-- Demo 1: NotebookLM -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
+                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">1. Komplexe Dokumente verstehen</h3>
+                    <p class="text-gray-600 text-sm mb-4">Stundenlanges Suchen in hunderten Seiten von Gesetzen oder Verordnungen? Fragen Sie einfach eine KI, die Ihre Dokumente gelesen hat.</p>
+                    <div class="bg-gray-100 p-4 rounded-lg text-sm mb-4 flex-grow">
+                        <strong>Demo-Szenario (NotebookLM):</strong> Die neue ADR-Verordnung (500 Seiten) wurde in die KI geladen.
+                        <p class="mt-2 font-semibold">Ihre Frage:</p>
+                        <p class="bg-white p-2 rounded shadow-sm">"Was sind die wichtigsten Änderungen für den Transport von Lithium-Batterien?"</p>
+                    </div>
+                    <button id="notebooklm-demo-btn" class="w-full text-white font-bold py-2 px-4 rounded-lg" style="background-color: var(--secondary-color);">KI-Antwort erhalten</button>
+                    <div id="notebooklm-demo-result" class="hidden mt-4 p-4 rounded-lg" style="background-color:var(--light-success-bg); color:var(--success-color); border-left: 4px solid var(--success-color)">
+                        <p class="font-bold">Antwort in 5 Sekunden:</p>
+                        <ul class="list-disc pl-5 mt-2 text-sm">
+                            <li><strong>Neue Kennzeichnungspflicht:</strong> Alle Verpackungen müssen nun mit dem neuen UN3480 Warnhinweis versehen werden.</li>
+                            <li><strong>Getrennte Lagerung:</strong> Defekte Batterien müssen in speziellen, feuerfesten Behältern transportiert werden.</li>
+                            <li><strong>Schulungsnachweis:</strong> Fahrer benötigen ab 01.01.2026 eine zertifizierte ADR-Zusatzschulung für Klasse 9.</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Demo 2: Fonio AI -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
+                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">2. Meetings in Aktionen umwandeln</h3>
+                    <p class="text-gray-600 text-sm mb-4">Nie wieder manuelle Protokolle schreiben. Lassen Sie eine KI zuhören und die Ergebnisse, Entscheidungen und Aufgaben zusammenfassen.</p>
+                    <div class="bg-gray-100 p-4 rounded-lg text-sm mb-4 flex-grow">
+                        <strong>Demo-Szenario (fonio AI):</strong> Eine 30-minütige Besprechung zur Fuhrpark-Erneuerung wurde aufgezeichnet.
+                        <p class="mt-2 font-semibold">Auszug aus dem Transkript:</p>
+                        <p class="bg-white p-2 rounded shadow-sm text-gray-500 italic">"...also, äh, wir sollten dann die Angebote von MAN und Scania vergleichen. Peter, du kümmerst dich bitte darum, ja? Und, äh, bis Ende nächster Woche brauchen wir da eine Entscheidungsgrundlage..."</p>
+                    </div>
+                    <button id="fonio-demo-btn" class="w-full text-white font-bold py-2 px-4 rounded-lg" style="background-color: var(--secondary-color);">KI-Zusammenfassung erstellen</button>
+                    <div id="fonio-demo-result" class="hidden mt-4 p-4 rounded-lg" style="background-color:var(--light-success-bg); color:var(--success-color); border-left: 4px solid var(--success-color)">
+                        <p class="font-bold">Ergebnis in 10 Sekunden:</p>
+                        <p class="text-sm mt-2"><strong>Entscheidungen:</strong> Angebote für neue LKW von MAN und Scania werden verglichen.</p>
+                        <p class="text-sm mt-1"><strong>Aufgaben:</strong></p>
+                        <ul class="list-disc pl-5 text-sm">
+                            <li><strong>[Peter]</strong>: Vergleich der Angebote von MAN und Scania erstellen. <strong>Fällig: 10.10.2025</strong></li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Demo 3: ElevenLabs -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
+                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">3. Sprachbarrieren überwinden</h3>
+                    <p class="text-gray-600 text-sm mb-4">Wichtige Sicherheitsanweisungen müssen jeden Fahrer erreichen – unabhängig von seiner Muttersprache. KI kann Ihre Anweisungen sofort übersetzen und vorlesen.</p>
+                    <div class="bg-gray-100 p-4 rounded-lg text-sm mb-4 flex-grow">
+                        <strong>Demo-Szenario (ElevenLabs):</strong> Eine wichtige Sicherheitsanweisung soll an alle Fahrer kommuniziert werden.
+                        <p class="mt-2 font-semibold">Anweisung auf Deutsch:</p>
+                        <p class="bg-white p-2 rounded shadow-sm">"Achtung: Vor dem Verlassen des Fahrzeugs immer die Handbremse anziehen und den Unterlegkeil verwenden."</p>
+                    </div>
+                    <button id="elevenlabs-demo-btn" class="w-full text-white font-bold py-2 px-4 rounded-lg" style="background-color: var(--secondary-color);">Anweisung auf Polnisch abspielen</button>
+                    <div id="elevenlabs-demo-result" class="hidden mt-4 p-4 rounded-lg" style="background-color:var(--light-success-bg); color:var(--success-color); border-left: 4px solid var(--success-color)">
+                        <p class="font-bold">Audio-Wiedergabe gestartet:</p>
+                        <p class="text-sm mt-2 italic">"Uwaga: Przed opuszczeniem pojazdu zawsze zaciągnij hamulec ręczny i użyj klina pod koła."</p>
+                    </div>
+                </div>
+                <!-- Demo 4: Gemini Gems -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
+                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">4. Spezialisierte KI-Assistenten (Gems)</h3>
+                    <p class="text-gray-600 text-sm mb-4">Erstellen Sie eigene KI-Experten ("Gems"), die auf Ihre spezifischen Prozesse trainiert sind, z.B. für die Prüfung von Frachtdokumenten.</p>
+                    <div class="bg-gray-100 p-4 rounded-lg text-sm mb-4 flex-grow">
+                        <strong>Demo-Szenario (Gemini Gem):</strong> Ein "Gefahrgut-Prüfer" Gem wurde mit den Poscharnegg-Richtlinien trainiert.
+                        <p class="mt-2 font-semibold">Ihre Aufgabe:</p>
+                        <p class="bg-white p-2 rounded shadow-sm">"Prüfe das hochgeladene Frachtdokument (PDF) auf Konformität."</p>
+                    </div>
+                    <button id="gems-demo-btn" class="w-full text-white font-bold py-2 px-4 rounded-lg" style="background-color: var(--secondary-color);">KI-Prüfung starten</button>
+                    <div id="gems-demo-result" class="hidden mt-4 p-4 rounded-lg bg-gray-100 text-gray-800 border-l-4 border-gray-500">
+                        <p class="font-bold">Prüfbericht in 3 Sekunden:</p>
+                        <ul class="list-none pl-0 mt-2 text-sm space-y-1">
+                            <li><span class="font-bold text-green-600">[OK]</span> Gefahrgutklasse korrekt deklariert.</li>
+                            <li><span class="font-bold text-yellow-600">[WARNUNG]</span> Fehlender ADR-Schulungsnachweis für den zugewiesenen Fahrer (Müller, J.).</li>
+                            <li><span class="font-bold text-red-600">[FEHLER]</span> Verpackungsgruppe II angegeben, aber für UN1263 ist Gruppe I zwingend.</li>
+                        </ul>
+                    </div>
+                </div>
+                 <!-- Demo 5: Multimodal Damage Assessment -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
+                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">5. Automatisierte Schadensmeldung</h3>
+                    <p class="text-gray-600 text-sm mb-4">Lassen Sie eine KI Bilder und Fahrernotizen analysieren, um Schäden sofort zu klassifizieren und die richtigen Maßnahmen einzuleiten.</p>
+                    <div class="bg-gray-100 p-4 rounded-lg text-sm mb-4 flex-grow">
+                        <strong>Demo-Szenario (Multimodale KI):</strong> Ein Fahrer sendet ein Bild und eine kurze Sprachnachricht von einer beschädigten Palette.
+                        <p class="mt-2 font-semibold">Eingang:</p>
+                        <p class="bg-white p-2 rounded shadow-sm">"[Foto einer eingedrückten Palettenseite] + 'Hier, die Palette hinten links ist eingedrückt. Sieht nicht so schlimm aus.'"</p>
+                    </div>
+                    <button id="damage-demo-btn" class="w-full text-white font-bold py-2 px-4 rounded-lg" style="background-color: var(--secondary-color);">KI-Analyse starten</button>
+                    <div id="damage-demo-result" class="hidden mt-4 p-4 rounded-lg bg-gray-100 text-gray-800 border-l-4 border-gray-500">
+                        <p class="font-bold">Analyse in 4 Sekunden:</p>
+                         <ul class="list-none pl-0 mt-2 text-sm space-y-1">
+                            <li><strong>Klassifizierung:</strong> Mechanische Beschädigung (Stauchung).</li>
+                            <li><strong>Schweregrad:</strong> Mittel (Inhalt möglicherweise betroffen).</li>
+                            <li><strong>Aktionen:</strong>
+                                <ul class="list-disc pl-5">
+                                    <li>Schadensprotokoll automatisch erstellt.</li>
+                                    <li>Fahrer angewiesen, Ware zu separieren.</li>
+                                    <li>Auftrag im TMS markiert.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="fahrplan" class="section bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-6" style="color: var(--primary-color);"><span class="text-4xl mr-2" style="color:var(--accent-color);">4.</span>Ihr persönlicher Umsetzung-Fahrplan</h2>
+            <p class="text-gray-700 mb-8">Dies ist Ihr individueller Fahrplan. Nutzen Sie die Gemini-Funktionen, um eine Risikoanalyse für Ihren Plan zu erstellen oder einen E-Mail-Entwurf zur internen Kommunikation zu generieren.</p>
+            <div id="fahrplanContent" class="space-y-8">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4 pb-2 border-b-2" style="color: var(--secondary-color); border-color: var(--accent-color);">Phase 1: Fundament & Entdeckung (Woche 1-4)</h3>
+                    <ul class="list-disc pl-6 space-y-3 text-gray-700">
+                        <li class="flex items-center gap-4"><span><strong>Aktion:</strong> Definition klarer Erfolgsmetriken (KPIs).</span> <button id="generateKpiBtn" class="gemini-button text-sm" disabled>✨ KPI-Vorschläge generieren</button></li>
+                        <li><strong>Aktion:</strong> Bildung einer internen "KI-Gruppe" (GF, IT, Dispo, Fahrer).</li>
+                        <li><strong>Aktion:</strong> Prüfung von Fördermöglichkeiten (z.B. KMU.DIGITAL, XS Job von SFG).</li>
+                        <li id="fahrplan_copilot" class="roadmap-item hidden"><strong>🚀 Low-Hanging Fruit:</strong> Pilotprojekt M365 Copilot für 3-5 Schlüsselpersonen in der Verwaltung.</li>
+                        <li id="fahrplan_meeting_ai" class="roadmap-item hidden"><strong>🚀 Low-Hanging Fruit:</strong> Pilotprojekt Meeting-AI-Tool (z.B. fonio) für automatische Protokolle.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4 pb-2 border-b-2" style="color: var(--secondary-color); border-color: var(--accent-color);">Phase 2: Pilotierung & Lernen (Monate 1-3)</h3>
+                    <ul class="list-disc pl-6 space-y-3 text-gray-700">
+                        <li id="fahrplan_ausschreibung" class="roadmap-item hidden"><strong>📈 Strategisches Projekt:</strong> Pilotprojekt Ausschreibungs-Analyse mit 15 realen LVs.</li>
+                        <li id="fahrplan_dokumentenanalyse" class="roadmap-item hidden"><strong>📈 Strategisches Projekt:</strong> Pilotprojekt KI-Dokumenten-Analyse zur Auswertung neuer Verordnungen.</li>
+                         <li id="fahrplan_wissensbasis" class="roadmap-item hidden"><strong>📈 Strategisches Projekt:</strong> Pilotprojekt KI-Wissensdatenbank zur Beschleunigung des Onboardings.</li>
+                         <li id="fahrplan_fahrer_app" class="roadmap-item hidden"><strong>📈 Strategisches Projekt:</strong> Pilotprojekt einer KI-Übersetzer-App für eine Gruppe internationaler Fahrer.</li>
+                        <li id="fahrplanPlaceholderPhase2" class="">Noch keine strategischen Projekte für diese Phase ausgewählt.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4 pb-2 border-b-2" style="color: var(--secondary-color); border-color: var(--accent-color);">Phase 3: Skalierung & Optimierung (ab Monat 4)</h3>
+                    <ul class="list-disc pl-6 space-y-3 text-gray-700">
+                        <li><strong>Aktion:</strong> Unternehmensweiter Rollout der erfolgreichen Pilotprojekte.</li>
+                        <li><strong>Aktion:</strong> Förderung einer datengetriebenen Kultur durch Schulungen.</li>
+                        <li id="fahrplan_wartung" class="roadmap-item hidden"><strong>⚙️ Nächster Schritt:</strong> Evaluation von Predictive Maintenance basierend auf der verbesserten Datenbasis.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t flex flex-wrap gap-4">
+                <button id="generateRiskAnalysisBtn" class="gemini-button" disabled>✨ Risikoanalyse für Fahrplan erstellen</button>
+                <button id="generateEmailBtn" class="gemini-button" disabled>✨ Fahrplan als E-Mail-Entwurf generieren</button>
+            </div>
+        </section>
+
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const state = {
+        selectedChallenges: new Set(),
+        roadmapItems: new Set()
+    };
+    
+    const challengeForm = document.getElementById('challengeForm');
+    const solutionsPlaceholder = document.getElementById('solutionsPlaceholder');
+    const solutionsContainer = document.getElementById('solutionsContainer');
+    const fahrplanPlaceholderPhase2 = document.getElementById('fahrplanPlaceholderPhase2');
+    const generateEmailBtn = document.getElementById('generateEmailBtn');
+    const generateRiskAnalysisBtn = document.getElementById('generateRiskAnalysisBtn');
+    const generateKpiBtn = document.getElementById('generateKpiBtn');
+
+    const geminiModal = document.getElementById('geminiModal');
+    const geminiModalTitle = document.getElementById('geminiModalTitle');
+    const geminiModalContent = document.getElementById('geminiModalContent');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const loaderHTML = `<div class="flex justify-center items-center h-40"><div class="loader"></div></div>`;
+    
+    const challengeMap = {
+        'aufwand': ['solution_aufwand'],
+        'ausfaelle': ['solution_ausfaelle'],
+        'ausschreibung': ['solution_ausschreibung'],
+        'telefon': ['solution_aufwand'],
+        'meetings': ['solution_aufwand', 'solution_demo_fonio'],
+        'dokumente': ['solution_dokumente'],
+        'schulung': ['solution_schulung'],
+        'fahrer': ['solution_fahrer']
+    };
+
+    const strategicRoadmapItems = new Set(['fahrplan_ausschreibung', 'fahrplan_dokumentenanalyse', 'fahrplan_wissensbasis', 'fahrplan_fahrer_app']);
+    
+    const solutionTitles = {
+        'fahrplan_copilot': 'Microsoft 365 Copilot',
+        'fahrplan_meeting_ai': 'KI-gestützte Meeting-Protokolle',
+        'fahrplan_dokumentenanalyse': 'KI-gestützte Dokumenten-Analyse',
+        'fahrplan_wartung': 'Vorausschauende Wartung',
+        'fahrplan_ausschreibung': 'KI-gestützte Ausschreibungs-Analyse',
+        'fahrplan_wissensbasis': 'KI-Wissensdatenbank für Mitarbeiter',
+        'fahrplan_fahrer_app': 'KI-Übersetzer & Onboarding-App'
+    };
+
+    const openModal = (title) => {
+        geminiModalTitle.textContent = title;
+        geminiModalContent.innerHTML = loaderHTML;
+        geminiModal.classList.remove('hidden');
+        geminiModal.classList.add('flex');
+    };
+
+    const closeModal = () => {
+        geminiModal.classList.add('hidden');
+        geminiModal.classList.remove('flex');
+    };
+
+    closeModalBtn.addEventListener('click', closeModal);
+    geminiModal.addEventListener('click', (e) => {
+        if (e.target === geminiModal) {
+            closeModal();
+        }
+    });
+
+    async function callGeminiAPI(systemPrompt, userPrompt) {
+        const apiKey = ""; 
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+        const payload = {
+            contents: [{ parts: [{ text: userPrompt }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API-Aufruf fehlgeschlagen mit Status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            
+            if (text) {
+                return text
+                    .replace(/### (.*?)\n/g, '<h3>$1</h3>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\* (.*?)\n/g, '<li>$1</li>')
+                    .replace(/(\<li\>.*?\<\/li\>)/g, '<ul>$1</ul>')
+                    .replace(/\<\/ul\>\n\<ul\>/g, '')
+                    .replace(/\n/g, '<br>');
+            } else {
+                return "Keine gültige Antwort von der KI erhalten. Bitte versuchen Sie es erneut.";
+            }
+        } catch (error) {
+            console.error("Gemini API Error:", error);
+            return `Ein Fehler ist aufgetreten: ${error.message}`;
+        }
+    }
+
+
+    const renderSolutions = () => {
+        let displayedSolutions = 0;
+        Object.values(challengeMap).flat().forEach(id => {
+            document.getElementById(id)?.classList.add('hidden');
+        });
+
+        state.selectedChallenges.forEach(challenge => {
+            const solutionsToShow = challengeMap[challenge];
+            if (solutionsToShow) {
+                solutionsToShow.forEach(solutionId => {
+                    const solutionElement = document.getElementById(solutionId);
+                    if (solutionElement) {
+                        solutionElement.classList.remove('hidden');
+                        displayedSolutions++;
+                    }
+                });
+            }
+        });
+
+        solutionsPlaceholder.style.display = displayedSolutions > 0 ? 'none' : 'block';
+    };
+
+    const renderRoadmap = () => {
+        document.querySelectorAll('.roadmap-item').forEach(item => item.classList.add('hidden'));
+        
+        let strategicItemActive = false;
+        state.roadmapItems.forEach(itemId => {
+            document.getElementById(itemId)?.classList.remove('hidden');
+            if(strategicRoadmapItems.has(itemId)) {
+                strategicItemActive = true;
+            }
+        });
+
+        fahrplanPlaceholderPhase2.style.display = strategicItemActive ? 'none' : 'list-item';
+        const hasItems = state.roadmapItems.size > 0;
+        generateEmailBtn.disabled = !hasItems;
+        generateRiskAnalysisBtn.disabled = !hasItems;
+        generateKpiBtn.disabled = !hasItems;
+    };
+
+    challengeForm.addEventListener('change', (e) => {
+        if (e.target.type === 'checkbox') {
+            if (e.target.checked) {
+                state.selectedChallenges.add(e.target.value);
+            } else {
+                state.selectedChallenges.delete(e.target.value);
+            }
+            renderSolutions();
+        }
+    });
+
+    solutionsContainer.addEventListener('click', async (e) => {
+        const fahrplanButton = e.target.closest('.fahrplan-button');
+        const geminiButton = e.target.closest('.gemini-button');
+
+        if (fahrplanButton) {
+            const fahrplanItemId = fahrplanButton.dataset.fahrplanItem;
+            if (state.roadmapItems.has(fahrplanItemId)) {
+                state.roadmapItems.delete(fahrplanItemId);
+                fahrplanButton.textContent = '➕ Zum Fahrplan hinzufügen';
+                fahrplanButton.classList.remove('bg-green-200', 'text-green-800');
+            } else {
+                state.roadmapItems.add(fahrplanItemId);
+                fahrplanButton.textContent = '✔️ Hinzugefügt';
+                fahrplanButton.classList.add('bg-green-200', 'text-green-800');
+            }
+            renderRoadmap();
+        }
+
+        if (geminiButton) {
+            const sourceId = geminiButton.dataset.geminiPromptSource;
+            const sourceElement = document.getElementById(sourceId);
+            const title = sourceElement.querySelector('summary').textContent.trim().replace('💡 ', '');
+            let description = '';
+            sourceElement.querySelectorAll('.p-6 > p').forEach(p => {
+                description += p.textContent + '\n';
+            });
+            
+            const type = geminiButton.dataset.geminiType;
+            let systemPrompt, userPrompt, modalTitle;
+
+            if (type === 'analyze') {
+                modalTitle = `KI-Analyse: ${title}`;
+                systemPrompt = "Sie sind ein auf KI-Implementierung spezialisierter Unternehmensberater für KMUs in der österreichischen Logistikbranche. Ihr Kunde ist die Poscharnegg GmbH. Formulieren Sie eine prägnante, praxisnahe Zusammenfassung für die Implementierung der folgenden KI-Lösung. Konzentrieren Sie sich auf die ersten konkreten Schritte, potenzielle Herausforderungen und den erwarteten kurzfristigen Nutzen. Der Ton ist professionell und ermutigend. Fügen Sie am Ende einen Abschnitt mit dem Titel '### Wichtige Fragen an Anbieter' hinzu. Listen Sie darin 3-4 kritische Fragen auf, die Poscharnegg potenziellen Softwareanbietern für diese spezifische Lösung stellen sollte, um die beste Wahl zu treffen.";
+                userPrompt = `Lösung: ${title}. Beschreibung: ${description}`;
+            } else if (type === 'vendor') {
+                modalTitle = `Mögliche Anbieter für: ${title}`;
+                systemPrompt = "Sie sind ein Marktforschungsanalyst, spezialisiert auf B2B-Softwarelösungen im DACH-Raum (Deutschland, Österreich, Schweiz). Ihre Aufgabe ist es, potenzielle Anbieter für eine spezifische KI-Technologie zu recherchieren. Nennen Sie 2-3 etablierte oder vielversprechende Unternehmen, die die angefragte Lösung anbieten. Geben Sie zu jedem Anbieter eine kurze Beschreibung (1-2 Sätze) mit Fokus auf deren Spezialisierung oder Zielgruppe.";
+                userPrompt = `Technologie/Lösung: ${title}`;
+            }
+            
+            openModal(modalTitle);
+            const result = await callGeminiAPI(systemPrompt, userPrompt);
+            geminiModalContent.innerHTML = `<div class="prose max-w-none">${result}</div>`;
+        }
+    });
+
+    generateEmailBtn.addEventListener('click', async () => {
+        if (state.roadmapItems.size > 0) {
+            openModal("E-Mail-Entwurf für das Team");
+
+            let roadmapText = "Folgende KI-Pilotprojekte wurden für die nächsten Phasen ausgewählt:\n\n";
+            state.roadmapItems.forEach(itemId => {
+                roadmapText += `- ${solutionTitles[itemId] || itemId}\n`;
+            });
+
+            const systemPrompt = "Sie sind eine Assistenz der Geschäftsführung. Ihre Aufgabe ist es, eine professionelle interne E-Mail zu entwerfen, die eine vorgeschlagene KI-Implementierungs-Roadmap zusammenfasst. Die E-Mail sollte an das 'Poscharnegg Team' adressiert, klar, prägnant und motivierend sein. Sie soll die ausgewählten Pilotprojekte und deren Ziele skizzieren.";
+            const userPrompt = roadmapText;
+
+            const result = await callGeminiAPI(systemPrompt, userPrompt);
+            geminiModalContent.innerHTML = `<div class="prose max-w-none bg-gray-50 p-4 rounded-lg border whitespace-pre-wrap font-sans">${result.replace(/<br>/g, '\n').replace(/<h3>(.*?)<\/h3>/g, '$1\n')}</div><button onclick="navigator.clipboard.writeText(this.previousElementSibling.innerText)" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Text kopieren</button>`;
+        }
+    });
+    
+    generateKpiBtn.addEventListener('click', async () => {
+         if (state.roadmapItems.size > 0) {
+            openModal("KI-generierte KPI-Vorschläge");
+            
+            let roadmapText = "Für die folgenden, im Fahrplan ausgewählten KI-Projekte benötige ich Vorschläge für Erfolgsmetriken:\n\n";
+            state.roadmapItems.forEach(itemId => {
+                roadmapText += `- ${solutionTitles[itemId] || itemId}\n`;
+            });
+
+            const systemPrompt = "Sie sind ein auf Business Intelligence spezialisierter Unternehmensberater für KMUs in der Logistikbranche. Ihre Aufgabe ist es, messbare Key Performance Indicators (KPIs) für geplante KI-Projekte vorzuschlagen. Formulieren Sie für jedes der genannten Projekte 2-3 konkrete, quantifizierbare KPIs. Erklären Sie kurz, was jeder KPI misst und warum er für ein Logistikunternehmen wie Porscharnegg relevant ist. Strukturieren Sie die Antwort klar nach den Projekten.";
+            const userPrompt = roadmapText;
+
+            const result = await callGeminiAPI(systemPrompt, userPrompt);
+            geminiModalContent.innerHTML = `<div class="prose max-w-none">${result}</div>`;
+        }
+    });
+
+    generateRiskAnalysisBtn.addEventListener('click', async () => {
+        if (state.roadmapItems.size > 0) {
+            openModal("Risikoanalyse für Ihren Fahrplan");
+
+            let roadmapText = "Der Implementierungsplan umfasst die folgenden Projekte:\n\n";
+             state.roadmapItems.forEach(itemId => {
+                roadmapText += `- ${solutionTitles[itemId] || itemId}\n`;
+            });
+
+            const systemPrompt = "Sie sind ein erfahrener Risikomanagement-Berater, spezialisiert auf Technologieeinführungen bei KMUs in der Logistik. Ihr Kunde ist die Poscharnegg GmbH. Identifizieren Sie für den folgenden KI-Implementierungsplan die 3-5 größten potenziellen Risiken (z.B. betriebliche Störungen, Datenschutz, Mitarbeiterakzeptanz, Integrationsprobleme, unerwartete Kosten). Beschreiben Sie jedes Risiko kurz und schlagen Sie eine praktische Minderungsstrategie vor. Der Ton ist sachlich und lösungsorientiert. Strukturieren Sie die Antwort mit Überschriften für jedes Risiko.";
+            const userPrompt = roadmapText;
+
+            const result = await callGeminiAPI(systemPrompt, userPrompt);
+            geminiModalContent.innerHTML = `<div class="prose max-w-none">${result}</div>`;
+        }
+    });
+    
+    document.querySelectorAll('.fahrplan-button').forEach(button => {
+        button.className = 'inline-block text-sm font-semibold py-2 px-4 rounded-full transition-colors duration-200 bg-gray-200 hover:bg-gray-300';
+    });
+
+    // Demo Use Cases Logic
+    document.getElementById('notebooklm-demo-btn').addEventListener('click', function() {
+        document.getElementById('notebooklm-demo-result').classList.remove('hidden');
+    });
+    document.getElementById('fonio-demo-btn').addEventListener('click', function() {
+        document.getElementById('fonio-demo-result').classList.remove('hidden');
+    });
+     document.getElementById('elevenlabs-demo-btn').addEventListener('click', function() {
+        document.getElementById('elevenlabs-demo-result').classList.remove('hidden');
+    });
+     document.getElementById('gems-demo-btn').addEventListener('click', function() {
+        document.getElementById('gems-demo-result').classList.remove('hidden');
+    });
+    document.getElementById('damage-demo-btn').addEventListener('click', function() {
+        document.getElementById('damage-demo-result').classList.remove('hidden');
+    });
+});
+</script>
+
+</body>
+</html>
+
