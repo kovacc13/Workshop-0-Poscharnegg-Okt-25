@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- Chosen Palette: Poscharnegg Corporate Teal -->
-<!-- Application Structure Plan: The SPA is structured as a guided, task-oriented journey. It starts with a 'Dashboard' that includes a strategic intro and an interactive, collapsible card section explaining key concepts. It then flows to a 'Diagnose' section where the user identifies challenges, which dynamically reveals relevant solutions. An engaging 'Demo Use Cases' section follows to make the abstract solutions tangible. Finally, the user can build a personalized 'Umsetzung-Fahrplan'. This intro-problem-solution-demo-plan structure was chosen to educate first, then guide a business leader logically from identifying needs to creating a strategic implementation roadmap. -->
+<!-- Application Structure Plan: The SPA is structured as a guided, task-oriented journey. It starts with a 'Dashboard' that includes an interactive, collapsible card section explaining key concepts. It then flows to a 'Diagnose' section where the user identifies challenges, which dynamically reveals relevant solutions. An engaging 'Demo Use Cases' section follows to make the abstract solutions tangible. Finally, the user can build a personalized 'Umsetzung-Fahrplan'. This intro-problem-solution-demo-plan structure was chosen to educate first, then guide a business leader logically from identifying needs to creating a strategic implementation roadmap. -->
 <!-- Visualization & Content Choices: 1. Report Info: Demo Use Cases. Goal: Make AI tangible. Viz: Interactive HTML/CSS cards. Interaction: Button clicks simulate AI processing (text reveals, summaries). Justification: Interactive demos are more impactful than static text for creating a 'wow' effect. 2. Report Info: Implementation Roadmap. Goal: Organize steps. Viz: Structured HTML/CSS. Interaction: Items are dynamically added. Justification: A personalized plan is more actionable. 3. Report Info: Challenges vs. Solutions. Goal: Connect problems to solutions. Viz: HTML Checkbox form & <details> elements. Interaction: Checking a challenge reveals solutions. Justification: Creates an interactive discovery path. -->
 <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <html lang="de" class="scroll-smooth">
@@ -242,6 +242,18 @@
             <p class="text-gray-700 mb-6">Basierend auf Ihren Angaben sind dies die relevantesten KI-Anwendungen. Nutzen Sie die Gemini-Funktionen für eine detaillierte Analyse oder um passende Anbieter zu finden.</p>
             <p id="solutionsPlaceholder" class="text-gray-600 bg-gray-100 p-4 rounded-lg">Bitte wählen Sie zuerst Ihre Herausforderungen im Diagnose-Tool aus, um die passenden Lösungen anzuzeigen.</p>
             <div id="solutionsContainer" class="space-y-6">
+                 <details id="solution_excel_ai" class="solution-card hidden border rounded-lg overflow-hidden">
+                    <summary class="p-5 font-bold text-xl cursor-pointer bg-gray-50 hover:bg-gray-100" style="color: var(--primary-color);">💡 Revolution in der Finanz- & Geschäftsplanung</summary>
+                    <div class="p-6 border-t">
+                        <p class="mb-4 text-gray-700"><strong>KI-Lösung:</strong> Moderne KI-Assistenten (z.B. Copilot in Excel) revolutionieren die numerische Berechnung. Statt wochenlanger manueller Arbeit erstellen sie komplexe Finanzmodelle, ROI-Berechnungen oder Business Pläne aus Rohdaten und einfachen Anweisungen – bis zu 1000-mal schneller.</p>
+                        <ul class="list-disc pl-5 space-y-2 mb-4">
+                            <li><strong style="color:var(--success-color);">Massive Zeitersparnis:</strong> Hunderte Stunden manueller Arbeit entfallen.</li>
+                            <li><strong style="color:var(--success-color);">Fokus auf Strategie:</strong> Ihr Team analysiert Ergebnisse, anstatt Daten abzutippen.</li>
+                            <li><strong style="color:var(--success-color);">Schnellere Entscheidungen</strong> auf Basis umfassender, schnell erstellter Modelle.</li>
+                        </ul>
+                         <div class="flex flex-wrap gap-4 items-center mt-4"><span class="tag tag-strategic">Strategisches Projekt</span><button class="fahrplan-button" data-fahrplan-item="fahrplan_excel_ai">➕ Zum Fahrplan hinzufügen</button><button class="gemini-button text-sm" data-gemini-type="analyze" data-gemini-prompt-source="solution_excel_ai">✨ Implementierungs-Analyse</button><button class="gemini-button text-sm" data-gemini-type="vendor" data-gemini-prompt-source="solution_excel_ai">✨ Anbieter-Vorschläge</button></div>
+                    </div>
+                </details>
                 <details id="solution_fahrer" class="solution-card hidden border rounded-lg overflow-hidden">
                     <summary class="p-5 font-bold text-xl cursor-pointer bg-gray-50 hover:bg-gray-100" style="color: var(--primary-color);">💡 KI-Übersetzer & Onboarding-Assistent für Fahrer</summary>
                     <div class="p-6 border-t">
@@ -249,7 +261,6 @@
                         <ul class="list-disc pl-5 space-y-2 mb-4">
                             <li><strong style="color:var(--success-color);">Reduzierung von Missverständnissen</strong> und Wartezeiten im Ausland.</li>
                             <li><strong style="color:var(--success-color);">Erhöhung der Sicherheit</strong> und Prozess-Konformität.</li>
-                            <li><strong style="color:var(--success-color);">Verbesserte Fahrerzufriedenheit</strong> und -bindung.</li>
                         </ul>
                          <div class="flex flex-wrap gap-4 items-center mt-4"><span class="tag tag-strategic">Strategisches Projekt</span><button class="fahrplan-button" data-fahrplan-item="fahrplan_fahrer_app">➕ Zum Fahrplan hinzufügen</button><button class="gemini-button text-sm" data-gemini-type="analyze" data-gemini-prompt-source="solution_fahrer">✨ Implementierungs-Analyse</button><button class="gemini-button text-sm" data-gemini-type="vendor" data-gemini-prompt-source="solution_fahrer">✨ Anbieter-Vorschläge</button></div>
                     </div>
@@ -325,9 +336,30 @@
                         </ul>
                     </div>
                 </div>
-                <!-- Demo 2: Fonio AI -->
+                 <!-- Demo 2: Invoice Extraction -->
                 <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
-                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">2. Meetings in Aktionen umwandeln</h3>
+                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">2. Von der Rechnung zur Tabelle</h3>
+                    <p class="text-gray-600 text-sm mb-4">Schluss mit dem manuellen Abtippen von Rechnungsdaten. Eine KI kann relevante Informationen automatisch auslesen und strukturieren.</p>
+                    <div class="bg-gray-100 p-4 rounded-lg text-sm mb-4 flex-grow">
+                        <strong>Demo-Szenario (Copilot):</strong> Zwei PDF-Rechnungen von Lieferanten wurden hochgeladen.
+                        <p class="mt-2 font-semibold">Ihre Anweisung:</p>
+                        <p class="bg-white p-2 rounded shadow-sm">"Extrahiere Rechnungsnummer, Datum, Lieferant und Gesamtbetrag aus diesen Dokumenten und stelle sie als Tabelle dar."</p>
+                    </div>
+                    <button id="invoice-demo-btn" class="w-full text-white font-bold py-2 px-4 rounded-lg" style="background-color: var(--secondary-color);">KI-Extraktion starten</button>
+                    <div id="invoice-demo-result" class="hidden mt-4 p-4 rounded-lg" style="background-color:var(--light-success-bg); border-left: 4px solid var(--success-color)">
+                        <p class="font-bold">Ergebnis in 6 Sekunden:</p>
+                        <table class="w-full text-sm mt-2">
+                            <thead class="text-left"><tr><th class="p-1">Rechnungs-Nr.</th><th class="p-1">Datum</th><th class="p-1">Lieferant</th><th class="p-1 text-right">Betrag</th></tr></thead>
+                            <tbody class="bg-white/50">
+                                <tr><td class="p-1">2025-4531</td><td class="p-1">28.09.2025</td><td class="p-1">Reifen-Huber GmbH</td><td class="p-1 text-right">€ 2.450,00</td></tr>
+                                <tr><td class="p-1">78-9912A</td><td class="p-1">30.09.2025</td><td class="p-1">Ersatzteil-König</td><td class="p-1 text-right">€ 876,50</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Demo 3: Fonio AI -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
+                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">3. Meetings in Aktionen umwandeln</h3>
                     <p class="text-gray-600 text-sm mb-4">Nie wieder manuelle Protokolle schreiben. Lassen Sie eine KI zuhören und die Ergebnisse, Entscheidungen und Aufgaben zusammenfassen.</p>
                     <div class="bg-gray-100 p-4 rounded-lg text-sm mb-4 flex-grow">
                         <strong>Demo-Szenario (fonio AI):</strong> Eine 30-minütige Besprechung zur Fuhrpark-Erneuerung wurde aufgezeichnet.
@@ -344,9 +376,9 @@
                         </ul>
                     </div>
                 </div>
-                <!-- Demo 3: ElevenLabs -->
+                <!-- Demo 4: ElevenLabs -->
                 <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
-                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">3. Sprachbarrieren überwinden</h3>
+                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">4. Sprachbarrieren überwinden</h3>
                     <p class="text-gray-600 text-sm mb-4">Wichtige Sicherheitsanweisungen müssen jeden Fahrer erreichen – unabhängig von seiner Muttersprache. KI kann Ihre Anweisungen sofort übersetzen und vorlesen.</p>
                     <div class="bg-gray-100 p-4 rounded-lg text-sm mb-4 flex-grow">
                         <strong>Demo-Szenario (ElevenLabs):</strong> Eine wichtige Sicherheitsanweisung soll an alle Fahrer kommuniziert werden.
@@ -359,9 +391,9 @@
                         <p class="text-sm mt-2 italic">"Uwaga: Przed opuszczeniem pojazdu zawsze zaciągnij hamulec ręczny i użyj klina pod koła."</p>
                     </div>
                 </div>
-                <!-- Demo 4: Gemini Gems -->
+                <!-- Demo 5: Gemini Gems -->
                 <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
-                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">4. Spezialisierte KI-Assistenten (Gems)</h3>
+                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">5. Spezialisierte KI-Assistenten (Gems)</h3>
                     <p class="text-gray-600 text-sm mb-4">Erstellen Sie eigene KI-Experten ("Gems"), die auf Ihre spezifischen Prozesse trainiert sind, z.B. für die Prüfung von Frachtdokumenten.</p>
                     <div class="bg-gray-100 p-4 rounded-lg text-sm mb-4 flex-grow">
                         <strong>Demo-Szenario (Gemini Gem):</strong> Ein "Gefahrgut-Prüfer" Gem wurde mit den Poscharnegg-Richtlinien trainiert.
@@ -378,9 +410,9 @@
                         </ul>
                     </div>
                 </div>
-                 <!-- Demo 5: Multimodal Damage Assessment -->
+                 <!-- Demo 6: Multimodal Damage Assessment -->
                 <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
-                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">5. Automatisierte Schadensmeldung</h3>
+                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">6. Automatisierte Schadensmeldung</h3>
                     <p class="text-gray-600 text-sm mb-4">Lassen Sie eine KI Bilder und Fahrernotizen analysieren, um Schäden sofort zu klassifizieren und die richtigen Maßnahmen einzuleiten.</p>
                     <div class="bg-gray-100 p-4 rounded-lg text-sm mb-4 flex-grow">
                         <strong>Demo-Szenario (Multimodale KI):</strong> Ein Fahrer sendet ein Bild und eine kurze Sprachnachricht von einer beschädigten Palette.
@@ -401,6 +433,28 @@
                                 </ul>
                             </li>
                         </ul>
+                    </div>
+                </div>
+                 <!-- Demo 7: Voice to E-Mail -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
+                    <h3 class="font-bold text-xl mb-2" style="color:var(--secondary-color);">7. Von Sprache zur E-Mail</h3>
+                    <p class="text-gray-600 text-sm mb-4">Diktieren Sie unterwegs eine kurze, unstrukturierte Notiz. Copilot verwandelt sie in eine professionelle, versandfertige E-Mail.</p>
+                    <div class="bg-gray-100 p-4 rounded-lg text-sm mb-4 flex-grow">
+                        <strong>Demo-Szenario (M365 Copilot):</strong> Eine kurze Sprachnachricht vom Disponenten.
+                        <p class="mt-2 font-semibold">Ihre Spracheingabe:</p>
+                        <p class="bg-white p-2 rounded shadow-sm italic text-gray-500">"Hey Copilot, schreib a E-Mail an den Lieferanten 'Schmidt-Beton', wir brauchen morgen dringend noch an zusätzlichen LKW für die Baustelle 'Hauptplatz Graz', weil da Material fehlt. Frag nach Preis und Verfügbarkeit, sei höflich, du weißt eh. Danke, servus."</p>
+                    </div>
+                    <button id="copilot-demo-btn" class="w-full text-white font-bold py-2 px-4 rounded-lg" style="background-color: var(--secondary-color);">KI-E-Mail generieren</button>
+                    <div id="copilot-demo-result" class="hidden mt-4 p-4 rounded-lg" style="background-color:var(--light-success-bg); color: var(--text-color); border-left: 4px solid var(--success-color)">
+                        <p class="font-bold">Generierter E-Mail-Entwurf:</p>
+                        <div class="text-sm mt-2 border p-2 rounded bg-white">
+                            <p><strong>Betreff:</strong> Dringende Anfrage: Zusätzlicher LKW für Baustelle Hauptplatz Graz am [morgiges Datum]</p>
+                            <p>Sehr geehrtes Team von Schmidt-Beton,</p>
+                            <p>wir benötigen für morgen, [Datum], kurzfristig einen zusätzlichen LKW für unsere Baustelle am Hauptplatz in Graz, da es zu einem unvorhergesehenen Materialengpass gekommen ist.</p>
+                            <p>Könnten Sie uns bitte umgehend über die Verfügbarkeit und die entsprechenden Kosten informieren?</p>
+                            <p>Vielen Dank für Ihre rasche Unterstützung.</p>
+                            <p>Mit freundlichen Grüßen,<br>Josef Poscharnegg</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -427,6 +481,7 @@
                         <li id="fahrplan_dokumentenanalyse" class="roadmap-item hidden"><strong>📈 Strategisches Projekt:</strong> Pilotprojekt KI-Dokumenten-Analyse zur Auswertung neuer Verordnungen.</li>
                          <li id="fahrplan_wissensbasis" class="roadmap-item hidden"><strong>📈 Strategisches Projekt:</strong> Pilotprojekt KI-Wissensdatenbank zur Beschleunigung des Onboardings.</li>
                          <li id="fahrplan_fahrer_app" class="roadmap-item hidden"><strong>📈 Strategisches Projekt:</strong> Pilotprojekt einer KI-Übersetzer-App für eine Gruppe internationaler Fahrer.</li>
+                         <li id="fahrplan_excel_ai" class="roadmap-item hidden"><strong>📈 Strategisches Projekt:</strong> Pilotprojekt zur automatisierten Erstellung von Finanz-Reports mit KI in Excel.</li>
                         <li id="fahrplanPlaceholderPhase2" class="">Noch keine strategischen Projekte für diese Phase ausgewählt.</li>
                     </ul>
                 </div>
@@ -469,7 +524,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const loaderHTML = `<div class="flex justify-center items-center h-40"><div class="loader"></div></div>`;
     
     const challengeMap = {
-        'aufwand': ['solution_aufwand'],
+        'aufwand': ['solution_aufwand', 'solution_excel_ai'],
         'ausfaelle': ['solution_ausfaelle'],
         'ausschreibung': ['solution_ausschreibung'],
         'telefon': ['solution_aufwand'],
@@ -479,7 +534,7 @@ document.addEventListener('DOMContentLoaded', function() {
         'fahrer': ['solution_fahrer']
     };
 
-    const strategicRoadmapItems = new Set(['fahrplan_ausschreibung', 'fahrplan_dokumentenanalyse', 'fahrplan_wissensbasis', 'fahrplan_fahrer_app']);
+    const strategicRoadmapItems = new Set(['fahrplan_ausschreibung', 'fahrplan_dokumentenanalyse', 'fahrplan_wissensbasis', 'fahrplan_fahrer_app', 'fahrplan_excel_ai']);
     
     const solutionTitles = {
         'fahrplan_copilot': 'Microsoft 365 Copilot',
@@ -488,7 +543,8 @@ document.addEventListener('DOMContentLoaded', function() {
         'fahrplan_wartung': 'Vorausschauende Wartung',
         'fahrplan_ausschreibung': 'KI-gestützte Ausschreibungs-Analyse',
         'fahrplan_wissensbasis': 'KI-Wissensdatenbank für Mitarbeiter',
-        'fahrplan_fahrer_app': 'KI-Übersetzer & Onboarding-App'
+        'fahrplan_fahrer_app': 'KI-Übersetzer & Onboarding-App',
+        'fahrplan_excel_ai': 'KI in der Finanz- & Geschäftsplanung'
     };
 
     const openModal = (title) => {
@@ -707,6 +763,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('notebooklm-demo-btn').addEventListener('click', function() {
         document.getElementById('notebooklm-demo-result').classList.remove('hidden');
     });
+    document.getElementById('invoice-demo-btn').addEventListener('click', function() {
+        document.getElementById('invoice-demo-result').classList.remove('hidden');
+    });
     document.getElementById('fonio-demo-btn').addEventListener('click', function() {
         document.getElementById('fonio-demo-result').classList.remove('hidden');
     });
@@ -719,9 +778,13 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('damage-demo-btn').addEventListener('click', function() {
         document.getElementById('damage-demo-result').classList.remove('hidden');
     });
+    document.getElementById('copilot-demo-btn').addEventListener('click', function() {
+        document.getElementById('copilot-demo-result').classList.remove('hidden');
+    });
 });
 </script>
 
 </body>
 </html>
+
 
